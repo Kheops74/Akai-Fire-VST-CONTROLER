@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Akai Fire VST Controller — Guide</title>
+<style>
+  @page { margin: 0; size: A4; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    color: #1a1a1a; background: #f0f0f0; line-height: 1.65;
+  }
+  .page {
+    width: 210mm; min-height: 297mm; margin: 0 auto 8mm;
+    background: white; padding: 18mm 16mm;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: relative;
+  }
+  @media print {
+    body { background: white; }
+    .page { margin: 0; box-shadow: none; page-break-after: always; }
+  }
+
+  /* Cover */
+  .cover {
+    background: linear-gradient(135deg, #0d0d0d 0%, #1a1a2e 50%, #16213e 100%);
+    color: white; display: flex; flex-direction: column;
+    justify-content: center; align-items: center; text-align: center; padding: 0;
+  }
+  .cover-logo {
+    font-size: 42pt; font-weight: 800; letter-spacing: 8px;
+    margin-bottom: 8mm;
+    background: linear-gradient(90deg, #FF6600, #FFCC00, #00FF88, #0099FF);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .cover-sub { font-size: 14pt; font-weight: 300; letter-spacing: 4px; color: #888; margin-bottom: 30mm; }
+  .cover-title { font-size: 28pt; font-weight: 700; margin-bottom: 4mm; color: white; border: none; padding: 0; }
+  .cover-desc { font-size: 11pt; color: #555; max-width: 120mm; line-height: 1.8; }
+  .cover-version { font-size: 11pt; color: #666; margin-top: 50mm; }
+  .cover-pads {
+    display: grid; grid-template-columns: repeat(16, 1fr); gap: 2px;
+    width: 120mm; margin: 20mm auto;
+  }
+  .cover-pads div { aspect-ratio: 1; border-radius: 2px; background: #222; }
+  .cover-pads .on { background: linear-gradient(135deg, #FF6600, #FFCC00); }
+  .cover-pads .on2 { background: linear-gradient(135deg, #0099FF, #00FF88); }
+
+  /* Headings */
+  h1 {
+    font-size: 20pt; font-weight: 700; color: #0a1628;
+    margin-bottom: 5mm; padding-bottom: 2mm; border-bottom: 2px solid #142850;
+  }
+  h2 {
+    font-size: 13pt; font-weight: 600; color: #142850;
+    margin-top: 6mm; margin-bottom: 3mm;
+  }
+  h3 { font-size: 11pt; font-weight: 600; color: #333; margin-top: 4mm; margin-bottom: 2mm; }
+  p { margin-bottom: 2.5mm; font-size: 10.5pt; }
+  ul, ol { margin: 0 0 3mm 5mm; font-size: 10.5pt; }
+  li { margin-bottom: 1mm; }
+  strong { color: #0a1628; }
+  code {
+    font-family: 'Consolas', monospace; background: #eef1f5;
+    padding: 1px 4px; border-radius: 2px; font-size: 9.5pt; color: #c0392b;
+  }
+
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; margin: 3mm 0; font-size: 10pt; }
+  th { background: #142850; color: white; padding: 2.5mm 3mm; text-align: left; font-weight: 600; font-size: 9.5pt; }
+  td { padding: 2mm 3mm; border-bottom: 1px solid #e0e0e0; }
+  tr:nth-child(even) td { background: #f8f9fb; }
+
+  /* Callouts */
+  .callout {
+    border-left: 3px solid #142850; background: #f0f4fa;
+    padding: 3mm 4mm; margin: 3mm 0; border-radius: 0 3px 3px 0; font-size: 10pt;
+  }
+
+  /* Fire image */
+  .fire-img { width: 100%; border-radius: 4px; margin: 3mm 0; }
+
+  /* Footer */
+  .footer {
+    position: absolute; bottom: 8mm; left: 16mm; right: 16mm;
+    display: flex; justify-content: space-between;
+    font-size: 8pt; color: #aaa; border-top: 1px solid #eee; padding-top: 1.5mm;
+  }
+
+  /* Label overlay on Fire image */
+  .fire-container { position: relative; width: 100%; margin: 3mm 0; }
+  .fire-container img { width: 100%; border-radius: 4px; }
+  .label-overlay {
+    position: absolute; font-size: 7pt; font-weight: 600; color: white;
+    background: rgba(10,22,40,0.85); padding: 1mm 2mm; border-radius: 2px;
+    white-space: nowrap;
+  }
+
+  /* Two columns */
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; }
+
+  /* Legend dots */
+  .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; vertical-align: middle; margin-right: 2mm; }
+  .d-orange { background: #FF6600; } .d-amber { background: #FEAA00; }
+  .d-green { background: #00CC66; } .d-blue { background: #0099FF; }
+  .d-purple { background: #8855FF; } .d-red { background: #FF4444; }
+  .d-off { background: #333; }
+  /* Grid A/B colors */
+  .d-redorange { background: #FE2A00; } .d-reddark { background: #981E1E; }
+  .d-lime { background: #AAFF00; } .d-menthe { background: #00E0A4; } .d-greend { background: #00A236; }
+  .d-violetd { background: #600098; } .d-magenta { background: #FE1AA2; } .d-blueviolet { background: #3C00FE; }
+  .d-blued { background: #001066; }
+  /* Row page colors (user-selected) */
+  .d-yellow { background: #FEF600; } .d-redorange { background: #FE3200; }
+  .d-redbright { background: #FE002A; } .d-magenta { background: #FE00BA; }
+  .d-purple { background: #A000FE; } .d-blueviolet { background: #4400FE; }
+  .d-bluedeep { background: #0008FE; } .d-bluelight { background: #0044FE; }
+  .d-cyan { background: #00CCFE; } .d-menthe { background: #00FEA0; }
+  .d-red { background: #FE0000; }
+</style>
+</head>
+<body>
+
+<!-- ===== PAGE 1 : COUVERTURE ===== -->
+<div class="page cover">
+  <div class="cover-logo">FIRE</div>
+  <div class="cover-sub">A K A I &nbsp;·&nbsp; P R O F E S S I O N A L</div>
+  <div class="cover-title">VST Controller</div>
+  <div class="cover-desc">
+    Surface de contrôle VST pour FL Studio<br>
+    Pilotez les paramètres de vos plugins en temps réel<br>
+    Mapping automatique, presets personnalisés, 12 pages de contrôle
+  </div>
+  <div class="cover-pads">
+    <div class="on"></div><div class="on"></div><div class="on"></div><div class="on"></div><div class="on"></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div class="on2"></div><div></div><div class="on2"></div><div></div>
+    <div class="on"></div><div class="on"></div><div class="on"></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div class="on2"></div><div class="on2"></div><div></div><div></div>
+    <div class="on"></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div class="on2"></div><div class="on2"></div><div></div>
+    <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div class="on2"></div><div></div><div></div><div class="on2"></div>
+  </div>
+  <div class="cover-version">par Kheops74 — Version 1.0 — 2026</div>
+</div>
+
+<!-- ===== PAGE 2 : VUE D'ENSEMBLE ===== -->
+<div class="page">
+  <h1>Vue d'ensemble</h1>
+
+  <p>Le VST Controller transforme l'Akai Fire en surface de contrôle dédiée aux <strong>plugins VST</strong> de FL Studio. Il suit automatiquement le channel sélectionné et affiche ses paramètres sur les pads et l'OLED.</p>
+
+  <h2>La matrice de pads : deux zones</h2>
+  <p>Les 64 pads (16 × 4) sont divisés en <strong>deux zones indépendantes</strong> :</p>
+
+  <div class="cols">
+    <div>
+      <h3>Zone gauche — 4 × 12 pads</h3>
+      <p><strong>Bargraph</strong> des 4 paramètres continus. Chaque rangée correspond à un encodeur. Les 12 colonnes affichent la valeur du paramètre sous forme de barre lumineuse. Cliquer un pad ancre la valeur.</p>
+    </div>
+    <div>
+      <h3>Zone droite — 4 × 4 pads</h3>
+      <p><strong>Grille discrète</strong>. Deux formats possibles : <em>dual</em> (8 paramètres × 2 pads verticaux) ou <em>toggle</em> (16 pads on/off indépendants). La couleur identifie la page active.</p>
+    </div>
+  </div>
+
+  <img src="FireNoSoft.jpg" class="fire-img" alt="Akai Fire">
+
+  <h2>Les deux blocs de boutons</h2>
+  <div class="cols">
+    <div>
+      <h3>Bloc gauche — Pages de rangées</h3>
+      <p>6 boutons (<strong>STEP SEQ</strong> → <strong>ALT</strong>) sélectionnent les pages des 4 rangées. Chaque bouton porte 2 sous-pages A/B = <strong>12 pages</strong>.</p>
+    </div>
+    <div>
+      <h3>Bloc droit — Pages de grille</h3>
+      <p>4 boutons (<strong>PATTERN/SONG</strong> → <strong>REC</strong>) sélectionnent les pages de la grille 4×4. 2 sous-pages A/B par bouton = <strong>8 pages</strong>.</p>
+    </div>
+  </div>
+
+  <div class="footer"><span>Akai Fire VST Controller</span><span>2</span></div>
+</div>
+
+<!-- ===== PAGE 3 : FONCTION DES TOUCHES ===== -->
+<div class="page">
+  <h1>Fonction de chaque touche</h1>
+
+  <img src="FireNoSoft.jpg" class="fire-img" alt="Akai Fire">
+
+  <h2>Encodeurs & bouton MODE</h2>
+  <table>
+    <tr><th>Contrôle</th><th>Fonction</th></tr>
+    <tr><td><strong>Encodeurs 1–4</strong></td><td>Règlent les 4 paramètres continus de la page courante (1 pas = 1/127)</td></tr>
+    <tr><td><strong>Bouton MODE</strong></td><td>Toggle vitesse : 2 LEDs = ×1 (normal), 4 LEDs = ×2 (rapide)</td></tr>
+    <tr><td><strong>Toucher encodeur</strong></td><td>Sélectionne la rangée, affiche le paramètre sur l'OLED</td></tr>
+  </table>
+
+  <h2>Boutons de page (gauche)</h2>
+  <table>
+    <tr><th>Bouton</th><th>Fonction</th></tr>
+    <tr><td><strong>STEP SEQ</strong></td><td>Page 1 : ENV AMP (A) / ENV FILT (B)</td></tr>
+    <tr><td><strong>NOTE</strong></td><td>Page 2 : OSC 1 (A) / OSC 2 (B)</td></tr>
+    <tr><td><strong>DRUM</strong></td><td>Page 3 : FILT A (A) / FILT B (B)</td></tr>
+    <tr><td><strong>PERFORM</strong></td><td>Page 4 : MOD A (A) / MOD B (B)</td></tr>
+    <tr><td><strong>SHIFT</strong></td><td>Page 5 : LFO A (A) / LFO B (B)</td></tr>
+    <tr><td><strong>ALT</strong></td><td>Page 6 : MISC A (une seule page, pas de B)</td></tr>
+  </table>
+  <div class="callout"><strong>2e clic</strong> sur le bouton actif = bascule A ↔ B. La sous-page est mémorisée par bouton.</div>
+
+  <div class="footer"><span>Akai Fire VST Controller</span><span>3</span></div>
+</div>
+
+<!-- ===== PAGE 4 : TOUCHES (suite) ===== -->
+<div class="page">
+  <h1>Fonction de chaque touche (suite)</h1>
+
+  <h2>Boutons de grille (droite)</h2>
+  <table>
+    <tr><th>Bouton</th><th>Fonction</th></tr>
+    <tr><td><strong>PATTERN/SONG</strong></td><td>Grille 1 : OSC A (A) / OSC B (B) — 8 params × 2 pads</td></tr>
+    <tr><td><strong>PLAY</strong></td><td>Grille 2 : LFO A (A) / LFO B (B) — 8 params × 2 pads</td></tr>
+    <tr><td><strong>STOP</strong></td><td>Grille 3 : OTHER A — 16 pads on/off (une seule page)</td></tr>
+    <tr><td><strong>REC</strong></td><td>Grille 4 : MISC A (A) / MISC B (B) — 4 params × 4 pads</td></tr>
+  </table>
+
+  <h2>Boutons MUTE & GRID</h2>
+  <table>
+    <tr><th>Bouton</th><th>Fonction</th></tr>
+    <tr><td><strong>MUTE 1–4</strong></td><td>Learn rangée : arme le mappage, clignote, puis mappe le paramètre touché dans le VST</td></tr>
+    <tr><td><strong>GRID ◀ ▶</strong></td><td>Learn grille : arme et défile les emplacements de la page de grille courante</td></tr>
+  </table>
+
+  <h2>SELECT & BROWSER</h2>
+  <table>
+    <tr><th>Contrôle</th><th>Fonction</th></tr>
+    <tr><td><strong>SELECT (rotation)</strong></td><td>Inverse le sens des pads dual (UP=OFF / UP=ON)</td></tr>
+    <tr><td><strong>SELECT (push)</strong></td><td>Pendant un Learn : efface le mappage courant</td></tr>
+    <tr><td><strong>BROWSER</strong></td><td>Scanner : analyse le plugin et génère un preset automatique</td></tr>
+    <tr><td><strong>PATTERN ▲ ▼</strong></td><td>Change le preset du VST (si PRESET_CHANGE défini)</td></tr>
+  </table>
+
+  <h2>LEDs TrackSel 1–4</h2>
+  <p>Les 4 bandeaux LED affichent le <strong>beat et la mesure</strong> pendant la lecture.</p>
+
+  <div class="footer"><span>Akai Fire VST Controller</span><span>4</span></div>
+</div>
+
+<!-- ===== PAGE 5 : PAGES A/B ===== -->
+<div class="page">
+  <h1>Pages A / B</h1>
+
+  <p>Chaque bouton de page porte <strong>deux sous-pages</strong> : A et B. Un 2e clic sur le bouton déjà sélectionné bascule entre les deux. La sous-page active est <strong>mémorisée par bouton</strong> : quitter une page B et y revenir restaure B.</p>
+
+  <h2>Code couleur</h2>
+  <table>
+    <tr><th>Sous-page</th><th>LED bouton</th></tr>
+    <tr><td>A</td><td><span class="dot d-amber"></span> Jaune / orange / vert (selon la page)</td></tr>
+    <tr><td>B</td><td><span class="dot d-red"></span> Rouge</td></tr>
+  </table>
+
+  <h2>Les 12 pages de rangées</h2>
+  <table>
+    <tr><th>Bouton</th><th>A</th><th>B</th><th>Couleur A</th><th>Couleur B</th></tr>
+    <tr><td>STEP SEQ</td><td>ENV AMP</td><td>ENV FILT</td><td><span class="dot d-yellow"></span>Jaune</td><td><span class="dot d-redorange"></span>Rouge-orange</td></tr>
+    <tr><td>NOTE</td><td>OSC 1</td><td>OSC 2</td><td><span class="dot d-redbright"></span>Rouge</td><td><span class="dot d-magenta"></span>Magenta</td></tr>
+    <tr><td>DRUM</td><td>FILT A</td><td>FILT B</td><td><span class="dot d-purple"></span>Violet</td><td><span class="dot d-blueviolet"></span>Bleu-violet</td></tr>
+    <tr><td>PERFORM</td><td>MOD A</td><td>MOD B</td><td><span class="dot d-bluedeep"></span>Bleu</td><td><span class="dot d-bluelight"></span>Bleu clair</td></tr>
+    <tr><td>SHIFT</td><td>LFO A</td><td>LFO B</td><td><span class="dot d-cyan"></span>Cyan</td><td><span class="dot d-menthe"></span>Vert-menthe</td></tr>
+    <tr><td>ALT</td><td>MISC A</td><td>—</td><td><span class="dot d-red"></span>Rouge</td><td>—</td></tr>
+  </table>
+
+  <h2>Les 8 pages de grille</h2>
+  <table>
+    <tr><th>Bouton</th><th>A</th><th>B</th><th>Couleur A</th><th>Couleur B</th><th>Format</th></tr>
+    <tr><td>PATTERN/SONG</td><td>OSC A</td><td>OSC B</td><td><span class="dot d-yellow"></span>Jaune</td><td><span class="dot d-redorange"></span>Rouge-orange</td><td>8 × 2 pads</td></tr>
+    <tr><td>PLAY</td><td>LFO A</td><td>LFO B</td><td><span class="dot d-magenta"></span>Magenta</td><td><span class="dot d-purple"></span>Violet</td><td>8 × 2 pads</td></tr>
+    <tr><td>STOP</td><td>OTHER A</td><td>—</td><td colspan="2">16 couleurs vives (1 par pad)</td><td>16 pads on/off</td></tr>
+    <tr><td>REC</td><td>MISC A</td><td>MISC B</td><td><span class="dot d-bluedeep"></span>Bleu</td><td><span class="dot d-bluelight"></span>Bleu clair</td><td>4 × 4 pads</td></tr>
+  </table>
+
+  <div class="footer"><span>Akai Fire VST Controller</span><span>5</span></div>
+</div>
+
+<!-- ===== PAGE 6 : GRILLE DES BOUTONS ===== -->
+<div class="page">
+  <h1>Grille des Boutons (4 × 4)</h1>
+
+  <p>Les 4 colonnes de droite forment la grille pour les <strong>boutons et commutateurs</strong> (switch). Trois formats selon les pages :</p>
+
+  <h2><span class="dot d-orange"></span>PATTERN/SONG et PLAY — 8 paramètres × 2 pads</h2>
+  <p>Chaque paramètre occupe <strong>2 pads verticaux</strong> :</p>
+  <ul>
+    <li>Pad <strong>haut</strong> = valeur 1 (off par défaut)</li>
+    <li>Pad <strong>bas</strong> = valeur 2 (on par défaut)</li>
+    <li>Moitié haute (rangées 0–1) et basse (rangées 2–3) : couleurs distinctes</li>
+  </ul>
+
+  <h3>Couleurs par page</h3>
+  <table>
+    <tr><th>Page</th><th>Sous-page A</th><th>Sous-page B</th></tr>
+    <tr><td>PATTERN/SONG</td><td><span class="dot d-yellow"></span>Jaune</td><td><span class="dot d-redorange"></span>Rouge-orange</td></tr>
+    <tr><td>PLAY</td><td><span class="dot d-magenta"></span>Magenta</td><td><span class="dot d-purple"></span>Violet</td></tr>
+  </table>
+
+  <h3>Inverser le sens — tournez SELECT on/off</h3>
+  <table>
+    <tr><th>Mode</th><th>Pad haut</th><th>Pad bas</th></tr>
+    <tr><td>UP=OFF (défaut)</td><td>off</td><td>on</td></tr>
+    <tr><td>UP=ON</td><td>on</td><td>off</td></tr>
+  </table>
+  <p>Mémorisé dans le preset via <code>DUAL_DEFAULT</code>.</p>
+
+  <h2><span class="dot d-green"></span>STOP — 16 pads on/off</h2>
+  <p>Page STOP : 16 pads indépendants en grille 4×4. Chaque pad a sa <strong>propre couleur vive</strong> (rouge, orange, jaune, vert, menthe, bleu, violet, magenta...) pour les distinguer au premier coup d'œil.</p>
+  <ul>
+    <li>Un appui = <strong>on</strong> (1.0)</li>
+    <li>Un autre appui = <strong>off</strong> (0.0)</li>
+    <li>Pad allumé = couleur du pad, pad éteint = inactif</li>
+  </ul>
+
+  <h2><span class="dot d-bluedeep"></span>REC — 4 paramètres × 4 pads</h2>
+  <p>Chaque paramètre occupe <strong>4 pads verticaux</strong>, pour les boutons qui utilisent <strong>3 ou 4 états différents</strong>. Couleur unique par sous-page.</p>
+  <table>
+    <tr><th>Sous-page</th><th>Couleur</th></tr>
+    <tr><td>A</td><td><span class="dot d-bluedeep"></span>Bleu</td></tr>
+    <tr><td>B</td><td><span class="dot d-bluelight"></span>Bleu clair</td></tr>
+  </table>
+
+  <div class="footer"><span>Akai Fire VST Controller</span><span>6</span></div>
+</div>
+
+<!-- ===== PAGE 7 : LEARN ===== -->
+<div class="page">
+  <h1>Mappage des paramètres (Learn)</h1>
+
+  <h2>Mapper une rangée — MUTE 1–4</h2>
+  <ol>
+    <li>Appuyez sur <strong>MUTE</strong> (1 à 4) pour la rangée à mapper.</li>
+    <li>La LED MUTE et la rangée de pads <strong>clignotent</strong>.</li>
+    <li>Touchez le paramètre dans le VST (clic sur le knob du plugin).</li>
+    <li>Le paramètre est mappé, le preset est sauvegardé.</li>
+    <li>L'OLED affiche <code>MAPPE : <nom></code>.</li>
+  </ol>
+  <div class="callout">Ré-appuyer sur le même MUTE annule le Learn.</div>
+
+  <h2>Mapper une entrée de grille — GRID ◀ ▶</h2>
+  <ol>
+    <li>Appuyez sur <strong>GRID ◀</strong> ou <strong>GRID ▶</strong>.</li>
+    <li>L'emplacement actif <strong>clignote</strong>. L'OLED indique la colonne.</li>
+    <li>Touchez le paramètre du VST : il est mappé sur l'emplacement.</li>
+    <li>GRID ▶ / ◀ défile les emplacements pour enchaîner les mappings.</li>
+  </ol>
+
+  <h2>Effacer un mappage — SELECT push</h2>
+  <p>Pendant un Learn (rangée ou grille), <strong>appuyer sur le SELECT</strong> efface le mappage courant :</p>
+  <ul>
+    <li>Les pads s'éteignent, le preset est sauvegardé.</li>
+    <li>L'OLED affiche <code>R1 effacee</code> ou <code>G col 3 effacee</code>.</li>
+    <li>Si l'emplacement est vide, le Learn est annulé.</li>
+  </ul>
+
+  <div class="footer"><span>Akai Fire VST Controller</span><span>7</span></div>
+</div>
+
+<!-- ===== PAGE 8 : BROWSER + OLED ===== -->
+<div class="page">
+  <h1>BROWSER & OLED</h1>
+
+  <h2>Bouton BROWSER — génération de preset</h2>
+  <p>Le bouton <strong>BROWSER</strong> lance le scanner : il analyse tous les paramètres du plugin et génère un preset au format 12 pages / 8 grid.</p>
+
+  <h3>LED BROWSER</h3>
+  <table>
+    <tr><th>État</th><th>Signification</th></tr>
+    <tr><td><span class="dot d-off"></span>Éteinte</td><td>Pas de plugin cible</td></tr>
+    <tr><td><span class="dot d-amber"></span>Clignotante</td><td>Plugin sans preset — appuyez sur BROWSER</td></tr>
+    <tr><td><span class="dot d-green"></span>Allumée fixe</td><td>Preset existant</td></tr>
+  </table>
+
+  <h2>Changement de preset VST — PATTERN ▲ ▼</h2>
+  <p>Les boutons <strong>PATTERN ▲ ▼</strong> changent le preset du VST si le fichier preset contient <code>PRESET_CHANGE</code>.</p>
+
+  <h2>OLED</h2>
+  <table>
+    <tr><th>Ligne</th><th>Contenu</th><th>Exemple</th></tr>
+    <tr><td>1 (haut)</td><td>Page courante + nom du plugin</td><td><code>ENV AMP | Repro-5</code></td></tr>
+    <tr><td>2 (bas)</td><td>Nom et valeur du dernier paramètre touché</td><td><code>Cutoff: 0.523</code></td></tr>
+  </table>
+  <p>Les notifications (changement de page, Learn, vitesse) s'affichent 2–3 s puis disparaissent.</p>
+
+  <h2>LEDs TrackSel 1–4</h2>
+  <p>Les 4 bandeaux LED affichent le <strong>beat et la mesure</strong> pendant la lecture.</p>
+
+  <div class="footer"><span>Akai Fire VST Controller</span><span>8</span></div>
+</div>
+
+</body>
+</html>
