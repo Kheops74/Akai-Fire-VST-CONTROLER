@@ -1,150 +1,246 @@
-# Akai Fire VST Controler
+# Akai Fire — VST Controller
 
-Contrôle des paramètres d'un VST depuis un Akai Fire : 6 pages de rangées (boutons de
-gauche) pour 4 paramètres continus sous les encodeurs avec bargraph 12 pads, et 4 pages
-de grille globales (boutons de droite) pour un bloc discret 4×4 — les deux blocs sont
-**totalement indépendants**. Un preset par VST. Conçu pour être plus rapide que la
-souris sur les 20-30 paramètres réellement utilisés — voir `SPEC.md` pour la
-philosophie, l'architecture et les limites de la V1.
+## Notice d'utilisation
 
-## Installation
+---
 
-1. Copier le dossier `Akai Fire VST Controler` **en entier** dans
-   `<données FL>\Settings\Hardware\` (le chemin du dossier de données se voit dans
-   Options → Fichier).
-2. Options → Configuration MIDI → entrée du second Fire → Type de contrôleur →
-   **Akai Fire VST Controler**.
-3. L'autre unité Fire peut rester sous EndGame : ce script ne déclare aucun
-   `receiveFrom`, il ne peut pas être asservi par le mode multi-device d'EndGame.
+### Vue d'ensemble
+
+Le Akai Fire VST Controller transforme votre Akai Fire en surface de contrôle dédiée aux **plugins VST** de FL Studio. Les 64 pads, les 4 encodeurs et l'écran OLED sont utilisés pour piloter en temps réel les paramètres de n'importe quel synthétiseur ou effet VST, mémoriser des presets personnalisés, et générer automatiquement un mapping quand le plugin n'en a pas.
+
+---
+
+### Démarrage
+
+À l'ouverture de FL Studio, une **animation d'intro** se joue sur les pads :
+
+> **AKAI** (rouge) → **FIRE** (orange) → **VST** (bleu) → **CRTL** (vert) → vague multicolore → éclatement
+
+Pendant l'animation, les contrôles sont bloqués. À la fin, le contrôleur bascule en mode normal. L'OLED affiche le nom de la page courante et le nom du plugin ciblé.
+
+---
+
+### Sélection du plugin cible
+
+Le contrôleur suit automatiquement le **channel sélectionné** dans FL Studio. Dès que vous cliquez sur un channel contenant un plugin VST, il devient la cible active. L'OLED affiche son nom à côté de la page courante.
+
+---
+
+### Les 4 encodeurs
+
+Les 4 encodeurs crantés contrôlent les **4 paramètres continus** de la page de rangées courante. Un cran = un pas de 1/127 (pas d'accélération).
+
+#### Bouton MODE (vitesse)
+
+Le bouton **MODE** (sous les encodeurs) bascule entre deux vitesses :
+
+| État | LEDs MODE | Vitesse |
+|------|-----------|---------|
+| Normal | 2 LEDs allumées | ×1 (1 pas par cran) |
+| Rapide | 4 LEDs allumées | ×2 (2 pas par cran) |
+
+La vitesse est remise à ×1 au redémarrage. L'OLED affiche brièvement `Encodeurs x1` ou `Encodeurs x2`.
+
+---
+
+### Les pages de rangées (bloc gauche)
+
+Les 6 boutons de gauche (**STEP SEQ**, **NOTE**, **DRUM**, **PERFORM**, **SHIFT**, **ALT**) sélectionnent les pages des 4 rangées de pads.
+
+#### Pages A et B
+
+Chaque bouton porte **deux sous-pages** : A et B. Cela donne **12 pages** au total.
+
+- **1er clic** sur un bouton : sélectionne la page, restaure la sous-page mémorisée (A ou B).
+- **2e clic** sur le bouton déjà actif : bascule A ↔ B.
+- La sous-page est **mémorisée** par bouton. Quitter une page B et y revenir restaure B.
+
+#### Code couleur des LEDs
+
+| Sous-page | Couleur LED du bouton |
+|-----------|----------------------|
+| A | Jaune / orange / vert (selon la page) |
+| B | Rouge |
+
+#### Particularité du bouton ALT
+
+Le bouton **ALT** (bouton 6) est monochrome : il n'a qu'**une seule page** (pas de sous-page B).
+
+#### Noms des 12 pages
+
+| Bouton | Sous-page A | Sous-page B |
+|--------|-------------|-------------|
+| STEP SEQ | ENV AMP | ENV FILT |
+| NOTE | OSC 1 | OSC 2 |
+| DRUM | FILT A | FILT B |
+| PERFORM | MOD A | MOD B |
+| SHIFT | LFO A | LFO B |
+| ALT | MISC A | — |
+
+---
+
+### Les pads de rangées (colonnes 0–11)
+
+Les 12 colonnes de gauche forment un **bargraphe** pour les 4 paramètres continus :
+
+- Chaque rangée (0–3) correspond à un encodeur.
+- Les 12 pads affichent la **valeur** du paramètre sous forme de barre lumineuse.
+- **Cliquer un pad** ancre la valeur à la position correspondante.
+- La couleur reflète la page active (chaque page a sa teinte).
+
+---
+
+### Les pages de grille (bloc droit)
+
+Les 4 boutons de droite (**PATTERN/SONG**, **PLAY**, **STOP**, **REC**) sélectionnent les pages de la grille discrète (colonnes 12–15). Ces pages sont **indépendantes** des pages de rangées.
+
+Comme pour les rangées, chaque bouton porte deux sous-pages A/B, sauf exceptions. Cela donne **8 pages** au total.
+
+#### Noms des 8 pages
+
+| Bouton | Sous-page A | Sous-page B |
+|--------|-------------|-------------|
+| PATTERN/SONG | OSC A | OSC B |
+| PLAY | LFO A | LFO B |
+| STOP | OTHER A (toggle) | — |
+| REC | MISC A | MISC B |
+
+#### Format dual (pages normales)
+
+Les pages OSC, LFO et MISC utilisent le format **dual** :
+
+- 8 paramètres par page, chacun sur **2 pads verticaux**.
+- Pad **haut** = valeur 1 (off par défaut), pad **bas** = valeur 2 (on par défaut).
+- La moitié haute (rangées 0–1) et la moitié basse (rangées 2–3) ont des couleurs distinctes.
+
+#### Format toggle (page STOP)
+
+La page STOP est un **toggle 16 pads** :
+
+- 16 pads indépendants (grille 4×4).
+- Un appui = **on** (1.0), un autre appui = **off** (0.0).
+- Pad allumé = paramètre actif, pad éteint = paramètre inactif.
+
+#### Inverser le sens dual (SELECT)
+
+La rotation du **SELECT** permet d'inverser le sens des pads dual :
+
+| Mode | Pad haut | Pad bas |
+|------|----------|---------|
+| UP=OFF (défaut) | off | on |
+| UP=ON | on | off |
+
+Ce réglage est mémorisé dans le preset via `DUAL_DEFAULT`.
+
+---
+
+### Mappage des paramètres (Learn)
+
+Le mode Learn permet d'assigner manuellement un paramètre du VST à un contrôle du Fire.
+
+#### Mappage d'une rangée (MUTE 1–4)
+
+1. Appuyez sur un bouton **MUTE** (1 à 4) correspondant à la rangée à mapper.
+2. La LED MUTE et la rangée de pads **clignotent**.
+3. Dans FL Studio, **touchez le paramètre** du VST souhaité (clic sur le knob du plugin).
+4. Le paramètre est mappé automatiquement, le preset est sauvegardé.
+5. L'OLED affiche `MAPPE : <nom du paramètre>`.
+
+Ré-appuyer sur le même MUTE annule le Learn.
+
+#### Mappage d'une entrée de grille (GRID ◀ ▶)
+
+1. Appuyez sur **GRID ◀** ou **GRID ▶** pour armer le Learn sur la page de grille courante.
+2. L'emplacement actif **clignote**. L'OLED indique le numéro de colonne.
+3. Touchez le paramètre du VST : il est mappé sur l'emplacement qui clignote.
+4. GRID ▶/◀ défile les emplacements pour enchaîner plusieurs mappings rapidement.
+
+#### Effacer un mappage (SELECT push)
+
+Pendant un Learn (rangée ou grille), **appuyer sur le SELECT** (le bouton cranté) efface le mappage courant :
+
+- Les pads correspondants s'éteignent.
+- Le preset est sauvegardé immédiatement.
+- L'OLED affiche `R1 effacee` ou `G col 3 effacee`.
+
+Si l'emplacement est déjà vide, le Learn est simplement annulé.
+
+---
+
+### Bouton BROWSER (génération de preset)
+
+Le bouton **BROWSER** lance le **scanner** : il analyse tous les paramètres du plugin et génère un fichier preset automatiquement.
+
+#### LED BROWSER
+
+| État de la LED | Signification |
+|----------------|---------------|
+| Éteinte | Pas de plugin cible |
+| Clignotante | Plugin sans preset — appuyez sur BROWSER pour générer |
+| Allumée fixe | Preset existant (manuel ou généré) |
+
+#### Utilisation
+
+1. Sélectionnez un plugin sans preset (LED BROWSER clignote).
+2. Appuyez sur **BROWSER**.
+3. Le scanner analyse les paramètres et crée un preset au format 12 pages / 8 grid.
+4. L'OLED affiche le nombre de paramètres continus et discrets trouvés.
+5. La LED BROWSER passe en fixe.
+
+---
+
+### Changement de preset VST (PATTERN ▲ ▼)
+
+Les boutons **PATTERN ▲** et **PATTERN ▼** changent le preset du plugin VST directement depuis le Fire, si le preset contient une section `PRESET_CHANGE` (paramètre sélecteur + pas). Sans cette section, les boutons sont sans effet.
+
+---
+
+### LEDs TrackSel 1–4 (beat/mesure)
+
+Les 4 bandeaux LED en haut du Fire affichent le **beat et la mesure** pendant la lecture :
+
+- Clignotement synchronisé avec le tempo de FL Studio.
+- Indicateur de temps fort et position dans la mesure.
+
+---
+
+### OLED
+
+L'écran OLED affiche en permanence :
+
+- **Ligne 1** : nom de la page courante + nom du plugin (ex. `ENV AMP | Repro-5`).
+- **Ligne 2** : nom et valeur du dernier paramètre touché (persistant, mis à jour en temps réel par les encodeurs).
+- **Notifications transitoires** : changement de page, Learn, mappage, vitesse encodeurs (affichées 2–3 secondes puis disparaissent).
+
+---
+
+### Structure des fichiers preset
+
+Les presets sont stockés dans `fire_modules/presets/`. Chaque preset est un module Python contenant :
+
+- `PAGES` : 12 pages de rangées (6 boutons × 2 sous-pages), chacune avec 4 entrées de paramètres.
+- `GRID` : 8 pages de grille (4 boutons × 2 sous-pages), au format dual ou toggle.
+- `DUAL_DEFAULT` : sens par défaut des pads dual (optionnel).
+- `PRESET_CHANGE` : paramètre sélecteur pour PATTERN ▲/▼ (optionnel).
+
+Les presets sont générés automatiquement par le scanner (BROWSER) ou créés manuellement. Le fichier `exemple.py` sert de modèle de référence.
+
+---
+
+### Résumé des contrôles
 
 | Contrôle | Fonction |
-|---|---|
-| 4 encodeurs | 4 params continus de la page de rangées — ±1/127 par cran, sans accélération |
-| Toucher un encodeur | Mémorise le paramètre → OLED affiche nom + valeur en temps réel (persistant) |
-| Pads colonnes 1-12 | Bargraph du paramètre de la rangée — clic = pose la valeur |
-| Pads colonnes 13-16 | Bloc discret (voir ci-dessous) |
-| `STEP` `NOTE` `DRUM` `PERFORM` `SHIFT` `ALT` | 6 **pages de rangées** (continu, bloc gauche) |
-| `PATTERN/SONG` `PLAY` `STOP` `REC` | 4 **pages de grille** (discret, bloc droit) — **globales et indépendantes** des pages de rangées |
-| `PATTERN ▲` `PATTERN ▼` | Preset **suivant / précédent** du VST (si `PRESET_CHANGE` dans le preset) |
-| `MUTE 1-4` | **Mode LEARN** : arme la rangée — le paramètre touché dans le VST est mappé automatiquement, preset sauvegardé. Ré-appui = annulation |
-| `GRID ◀` `GRID ▶` | **LEARN discret** : fait clignoter + défiler les emplacements de la page de grille — un bouton du VST mappe l'emplacement qui clignote |
-| `SELECT` (appui) | Modificateur — réservé (aucune fonction en V1) |
-| `SELECT` (rotation) | **Cycle des modes dual par défaut** — `UP=OFF` `[0.0, 1.0]` (défaut) ↔ `UP=ON` `[1.0, 0.0]` (persisté dans le preset via `DUAL_DEFAULT`) |
-| `BROWSER` | Génère un preset auto pour le VST courant (catégorisation intelligente) |
-
-**Orthogonalité des pages.** Les 6 boutons de gauche ne changent que les 4 rangées
-(bargraph + encodeurs). Les 4 boutons de droite ne changent que la grille (bloc D).
-Changer d'un côté n'affecte pas l'autre.
-
-**Bloc discret — deux formats de page.** La plupart des synths ont des boutons à
-2 états (formes d'onde, on/off) : les **pages 1-3 sont dual** — 8 paramètres par
-page, chacun sur 2 pads verticaux (pad **HAUT = activé (on)**, pad **BAS = off/normal**,
-valeurs `[1.0, 0.0]` par défaut). La **page 4 reste quad** : 4 colonnes, jusqu'à 4 valeurs par
-paramètre (types de filtre, etc.).
-
-**Orientation dual par VST (SELECT rotation).** Certains VST inversent la convention
-(Repro-5 : `1.0` = état actif en haut). La **rotation du SELECT** cycle entre `UP=OFF`
-`[0.0, 1.0]` (défaut : pad BAS = on) et `UP=ON` `[1.0, 0.0]` (pad HAUT = on). Le mode
-est **persisté dans le preset** (`DUAL_DEFAULT`) et s'applique aux **nouvelles** entrées
-(learn ou génération) — les entrées existantes avec des `values` explicites ne sont pas
-modifiées. Les pages quad ne sont pas affectées.
-
-**Couleurs de la grille.** La couleur identifie la page active et le groupe :
-moitié **haute** de la grille (rangées 1-2) = `GridColors[page]`, moitié **basse**
-(rangées 3-4) = `GridColors2[page]` — même famille de teinte, clairement distincte.
-Page 1 = orange/rouge, page 2 = jaune/lime, page 3 = vert/menthe, page 4 = bleu/violet.
-
-**OLED.** Ligne 1 : page + nom du plugin. Ligne 2 : nom + valeur du dernier paramètre
-touché, **en temps réel et persistant** (ne disparaît pas, suit l'encodeur et la souris).
-
-**Suivi des presets du synthé.** Les valeurs sont relues en continu et tous les pads
-sont renvoyés **chaque seconde** : changer de preset sur le synthé se répercute sur
-les pads sans toucher aux contrôles.
-
-**LEDs de beat.** Les 4 LEDs à côté des boutons MUTE suivent le **beat et la mesure**
-pendant le play (remplissage progressif, rouge chaque 4e mesure) — même comportement
-que le script EndGame sur l'autre Fire.
-
-Pas de transport en V1 : les boutons de droite sont des pages de grille, la lecture se
-pilote depuis l'autre Fire (EndGame) ou à la souris.
-
-## Capacité
-
-- Continu : **6 pages × 4 rangées = 24 paramètres continus.**
-- Discret : **3 pages dual × 8 params = 24 params on/off + 1 page quad × 4 colonnes
-  = 4 paramètres multi-valeurs**, soit 28 discrets (la grille n'est pas multipliée
-  par les pages de rangées).
-
-## Sans preset
-
-Un VST sans preset reçoit un **mapping générique** automatique : les 24 premiers
-paramètres nommés en continu (6 pages × 4 rangées), les **16 suivants** en discret
-(4 pages de grille × 4 colonnes, valeurs linéaires 0, 1/3, 2/3, 1). Utilisable
-immédiatement, mais pas nécessairement musical — c'est un point de départ.
-
-Les pads ne sont éteints que si le channel sélectionné n'a pas de plugin (sampler,
-layer, audio clip, aucun channel) — l'OLED l'indique.
-
-## Créer un preset
-
-### Méthode Learn (la plus intuitive)
-
-1. Sélectionner la page de rangées voulue (boutons de gauche) ou la page de
-   grille (boutons de droite).
-2. **MUTE r** pour mapper la rangée r, ou **GRID ◀/▶** pour défiler les
-   emplacements de la grille.
-3. La LED MUTE / l'emplacement **clignote** → tourner un potard ou cliquer un
-   bouton **dans le VST** → mappé automatiquement, nom sur l'OLED, preset
-   sauvegardé. Ré-appui = annulation, timeout 30 s.
-4. Sans preset existant, le learn **crée** `presets/<vst>.py` au premier
-   mapping — façon rapide de construire un preset paramètre par paramètre.
-
-### Méthode automatique (BROWSER)
-
-1. Sélectionner le channel du VST dans FL.
-2. Appuyer sur `BROWSER` sur le Fire.
-3. Le script analyse les noms de paramètres, les catégorise par mots-clés
-   (ADSR, filtre, OSC, LFO, etc.) et écrit `fire_modules/presets/<vst>.py`.
-   S'il trouve un paramètre `preset`/`program`/`patch`, il ajoute aussi
-   `PRESET_CHANGE` — `PATTERN ▲▼` change alors de preset sur le VST.
-   La nomenclature **Repro-1 (u-he)** est couverte : `Env1/Env2`, `Osc1 PW`,
-   `Env1 Amount`, `Key Track`, `Osc1 Wave`, `LFO1 Wave`, `Filter Mode`, etc.
-4. Le preset est **rechargé à chaud** — vous pouvez jouer immédiatement.
-5. Pour ajuster : éditer le fichier `.py` généré (les valeurs 2 états valent
-   `[1.0, 0.0]` par défaut — pad HAUT = on, pad BAS = off ; mettre `[0.75, 0.25]`
-   si le VST attend 25/75 %), puis recharger le script.
-
-### Méthode manuelle
-
-1. Sélectionner le channel du VST dans FL, puis `BROWSER` sur le Fire.
-2. Ouvrir `fire_modules/scan_<vst>.txt` : chaque paramètre nommé y est listé avec son
-   index, sa valeur courante et sa valeur formatée.
-3. Copier `fire_modules/presets/exemple.py` en `fire_modules/presets/<vst>.py`,
-   remplir `PLUGIN_MATCH` (contenu dans le nom du plugin), puis `PAGES` (rangées
-   continus) et `GRID` (4 pages de grille globales) avec les index relevés dans le
-   scan. Les deux blocs sont séparés dans le preset.
-4. Recharger le script : réattribuer le type de contrôleur ou redémarrer FL.
-
-Les noms de paramètres peuvent être dupliqués (deux `Source` sur Repro-1) : l'index
-est la seule clé fiable, ne jamais référencer un paramètre par son nom seul.
-
-## Structure
-
-```
-device_FireVST.py        script principal (classe TFireVST)
-fire_modules/
-  constants.py           IDs matériels, protocole, constantes
-  display.py             OLED (copie v1.5)
-  fire_utils.py          conversions HSV
-  param_bridge.py        SEULE couche qui parle à l'API plugins
-  generic_preset.py      mapping automatique sans preset
-  preset_generator.py    catégorisation intelligente (BROWSER)
-  vst_page.py            rendu bargraph + bloc discret
-  vst_mode.py            état, dispatch, boucle idle
-  vst_scanner.py         dump des paramètres (BROWSER)
-  presets/               un fichier par VST + exemple.py (modèle)
-Akai Fire VST Controler Spike/   spike de la phase 0 (jetable)
-```
-
-Toute modification : lire `SPEC.md` d'abord — notamment §2 (périmètre), §8 (pièges)
-et §9 (points ouverts à trancher en beta).
+|----------|---------|
+| **Encodeurs 1–4** | Paramètres continus de la page courante |
+| **Bouton MODE** | Toggle vitesse ×1 / ×2 des encodeurs |
+| **STEP SEQ → ALT** | Pages de rangées (A/B par double-clic) |
+| **PATTERN/SONG → REC** | Pages de grille (A/B par double-clic) |
+| **Pads colonnes 0–11** | Bargraph + clic pour ancrer la valeur |
+| **Pads colonnes 12–15** | Grille discrète (dual / toggle) |
+| **MUTE 1–4** | Learn rangée (mapper un paramètre) |
+| **GRID ◀ ▶** | Learn grille (mapper + défiler) |
+| **SELECT (push)** | Effacer le mappage en cours de Learn |
+| **SELECT (rotate)** | Inverser le sens des pads dual |
+| **BROWSER** | Scanner + générer un preset |
+| **PATTERN ▲ ▼** | Changement de preset VST |
+| **TrackSel 1–4** | Indicateur beat/mesure |
