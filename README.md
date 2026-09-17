@@ -20,10 +20,15 @@ La forme de l'enveloppe est lisible d'un coup d'œil, sans lire quatre nombres.
 --installation--
 
 1 copier le dossier dans le dossier HARDWARE de fl studio ou il y a les scripts
+
 2 lancer FL studio Et démarrer le FIRE
+
 3 selectionner le script dans les options midi  
+
 4 sélectionner le vst que vous voulez mapper 
+
 5 un vst qui a jamais été mapper a la led BROWSER du akai fire qui clignote, il faut impérativement cliquer sur BROWSER une seule et unique fois pour chaque nouveau VST pour créer un fichier de config, quand un VST a deja un fichier de config, la led BROWSER est allumé en fixe
+
 6 une fois le fichier créer et la led BROWSER fixe, vous pouvez mapper le vst comme vous le voulez, ca sera sauvegarder automatiquement à chaque changement 
 
 
