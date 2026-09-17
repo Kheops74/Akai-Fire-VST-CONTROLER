@@ -18,6 +18,7 @@ RELEASE  ● ● ◐ ○ ○ ○ ○ ○ ○ ○ ○ ○
 La forme de l'enveloppe est lisible d'un coup d'œil, sans lire quatre nombres.
 
 --installation--
+
 1 copier le dossier dans le dossier HARDWARE de fl studio ou il y a les scripts
 2 lancer FL studio Et démarrer le FIRE
 3 selectionner le script dans les options midi  
