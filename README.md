@@ -31,6 +31,8 @@ La forme de l'enveloppe est lisible d'un coup d'œil, sans lire quatre nombres.
 
 6 une fois le fichier créer et la led BROWSER fixe, vous pouvez mapper le vst comme vous le voulez, ca sera sauvegarder automatiquement à chaque changement 
 
+7 passez en mode "learn" pour mapper le VST avec les 4 touches Mute/Solo pour les potards d'un VST, et GRID + - pour les boutons ou switch du VST  
+
 
 ### Vue d'ensemble
 
